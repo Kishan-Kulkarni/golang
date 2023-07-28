@@ -93,7 +93,7 @@ func main() {
 		posts = <-cPost
 		users = <-cUser
 		data := Data{Users: users , Posts: posts}
-		jsonData, _ := json.MarshalIndent(data,"", "  ")
+		jsonData, _ := json.Marshal(data)
         return c.SendString(string(jsonData))
     })
 	port:=os.Getenv("PORT")
