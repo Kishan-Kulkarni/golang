@@ -70,6 +70,8 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		defer cursorpost.Close(context.TODO())
+		defer cursoruser.Close(context.TODO())
 		var users []User
 		var posts []Post
 		cPost := make(chan []Post)
@@ -90,8 +92,8 @@ func main() {
 			cUser <- tempUsers
 			close(cUser)
 		}()
-		posts = <-cPost
 		users = <-cUser
+		posts = <-cPost
 		data := Data{Users: users , Posts: posts}
 		jsonData, _ := json.Marshal(data)
         return c.SendString(string(jsonData))
