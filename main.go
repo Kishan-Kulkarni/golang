@@ -25,7 +25,8 @@ type Post struct{
 	Image string `json:"image" bson:"image"`
 	Content string `json:"content" bson:"content"`
 	Author string `json:"_id" bson:"_id"`
-	
+	CreatedAt interface{} `json:"createdAt" bson:"createdAt`
+	UpdatedAt interface{} `json:"updatedAt" bson:"updatedAt`
 }
 
 type Data struct{
