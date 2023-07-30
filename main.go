@@ -56,22 +56,34 @@ func main() {
 		AppName:       "Test App v1.0.1",
 	})
 	app.Get("/", func(c *fiber.Ctx) error {
-		users := []User{}
-		posts := []Post{}
-		err := userCollection.SimpleFind(&users, bson.D{})
-		if err != nil {
-			return c.Status(500).JSON(fiber.Map{
-				"ok":    false,
-				"error": err.Error(),
-			})
-		}
-		err = postCollection.SimpleFind(&posts, bson.D{})
-		if err != nil {
-			return c.Status(500).JSON(fiber.Map{
-				"ok":    false,
-				"error": err.Error(),
-			})
-		}
+		cUser := make(chan []User)
+		cPost := make(chan []Post)
+		go func() error {
+			tempUsers := []User{}
+			err := userCollection.SimpleFind(&tempUsers, bson.D{})
+			if err != nil {
+				return c.Status(500).JSON(fiber.Map{
+					"ok":    false,
+					"error": err.Error(),
+				})
+			}
+			cUser <- tempUsers
+			return nil
+		}()
+		go func() error {
+			tempPosts := []Post{}
+			err = postCollection.SimpleFind(&tempPosts, bson.D{})
+			if err != nil {
+				return c.Status(500).JSON(fiber.Map{
+					"ok":    false,
+					"error": err.Error(),
+				})
+			}
+			cPost <- tempPosts
+			return nil
+		}()
+		posts := <-cPost
+		users := <-cUser
 		data := Data{Users: users, Posts: posts}
 		jsonData, _ := json.Marshal(data)
 		return c.SendString(string(jsonData))
